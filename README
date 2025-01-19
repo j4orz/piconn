@@ -1,2 +1,3 @@
-piconn: software 2.0 models on pytorch (eager on nv) and jax (graph on tpu)
-models: llama3, gemma, deepseekv2, qwen2.5
+piconn: software 2.0 models on pytorch
+models: gpt2, llama3
+references: hardt/recht, scardapane, jurafsky/martin, goodfellow/bengio, prince, murphy

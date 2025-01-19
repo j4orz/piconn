@@ -4,7 +4,8 @@
 1. [Models](#models)
     - [Linear Models](#linear-models)
     - [Non-linear Parametric Models](#non-linear-parametric-models)
-    - [System 1 Sequence Learning: Autoregressive Models](#system-1-sequence-learning-as-autoregression)
+    - [System 1 Sequence Learning](#system-1-sequence-learning-as-autoregression)
+    - [Transformers in Depth](#transformer-neural-networks-in-depth)
     - [System 2 Search](#system-2-search-)
     - [Non-linear Non-Parametric Models](#non-linear-non-parametric-models)
 2. [Optimization](#optimization)
@@ -17,7 +18,7 @@
 
 ## Linear Models
 
-**Classification**: recovers discriminative classifier $p(Y=c|\mathbf{X}=\mathbf{x}; \boldsymbol{\theta})$ where $Y \overset{\text{iid}}{\sim} Ber(p)$. First we start off with binary classification so $\mathcal{Y}=\{0,1\}$. The logistic regression (better named as sigmoidal classification) assumption is to take a linear hypothesis $h_{\boldsymbol{\theta}}(\mathbf{x})$ defined as
+**Classification**: recovers discriminative classifier $p(Y=c|\mathbf{X}=\mathbf{x}; \boldsymbol{\theta})$ where $Y \overset{\text{iid}}{\sim} Ber(p)$. First we start off with binary classification so $\mathcal{Y}=\{0,1\}$. The logistic regression (better thought of as sigmoidal classification) assumption is to take a linear hypothesis $h_{\boldsymbol{\theta}}(\mathbf{x})$ defined as so:
 
 $$
 \begin{align*}
@@ -88,7 +89,7 @@ TODO: manually derive gradient.
 
 general def of gradient. linearizatin. direction. inner product. points in direction of steepest descent.
 
-Finally, because logistic regression is selecting a stochastic map by producing parameters for $\mathcal{Y}$'s distribution, sampling a point estimate from the distribution (called inference) is done by evaluating $\hat{y} := \underset{y}{\mathop{\text{argmax}}}[p(y|\mathbf{x}; \boldsymbol{\theta})]$ Since we have a batch of inputs from data $\{\mathbf{x}^{(i)}, \mathbf{y}^{(i)}\}_{i=1}^n$, instead of sequentially sampling the model (distribution) for each input $\mathbf{x}^{(i)}$, parallel sampling is possible with a design matrix $\mathbf{X} \in \mathbb{R}^{n \times d}$:
+Finally, because logistic regression is selecting a stochastic map by producing parameters for $\mathcal{Y}$'s distribution, sampling a point estimate from the distribution (confusingly called inference in machine learning literature) is done by evaluating $\hat{y} := \underset{y}{\mathop{\text{argmax}}}[p(y|\mathbf{x}; \boldsymbol{\theta})]$ Since we have a batch of inputs from data $\{\mathbf{x}^{(i)}, \mathbf{y}^{(i)}\}_{i=1}^n$, instead of sequentially sampling the model (distribution) for each input $\mathbf{x}^{(i)}$, parallel sampling is possible with a design matrix $\mathbf{X} \in \mathbb{R}^{n \times d}$:
 
 $$
 \mathbf{X} = \begin{bmatrix}
@@ -150,27 +151,39 @@ These networks are optimized with gradient descent, but the gradient is derived 
 
 While the optimization and generalization of other non-linear models such as kernel methods and gaussian processes are formally well-understood (with functional analysis and bayesian probability, respectively), the primary method of inquiry for neural networks have been empiricism. There are many interesting problems that are open for the theoretician, but for now we proceed in this document with the understanding that the state of deep learning is more similar to alchemy than it is to chemistry.
 
-With that said, the domain of modelling we are interested in is language, which has converged onto autoregressive models. Following [(Sutton 2019)](http://www.incompleteideas.net/IncIdeas/BitterLesson.html), system 1 like behavior is covered with autoregressive sequence learning, and system 2 like behavior is covered with a search of thoughts. Each advance in network architecture will be covered in order to understand the network design that went into making high dimensional distribution estimation tractable.
+With that said, the domain of modelling we are interested in is language, which has converged onto autoregressive modeling. Following [(Sutton 2019)](http://www.incompleteideas.net/IncIdeas/BitterLesson.html), system 1 like behavior is covered with autoregressive sequence learning, and system 2 like behavior is covered with a search of thoughts. Each advance in network architecture will be covered in order to understand the network design that went into making high dimensional distribution estimation tractable.
+
+
+
+
+
 
 ## System 1 Sequence Learning as Autoregression
 
-Any sequence — whether text for language, pixel for vision, or wave for audio — can be modelled probabilistically with $(\Omega, \mathcal{F}, \mathbb{P})$ where
+Any sequence — whether text for language, pixels for vision, or waves for audio — can be modelled probabilistically with $(\Omega, \mathcal{F}, \mathbb{P})$ where
 
 $$
-p(X_1=x_1, \ldots, X_n=x_n; \boldsymbol{\theta}) = \prod_{i=1}^{n} p(\mathbf{x}_{i}|\mathbf{x}_{<i})
+p(X_1=x^{(1)}, \ldots, X_n=x^{(n)}; \boldsymbol{\theta}) = \prod_{i=1}^{n} p(\mathbf{x}^{(i)}|\mathbf{x}^{(< i)})
 $$
 
-is the n-dimensional joint probability distribution expressed with conditionals via factorization of the chain rule. Using this model results in exponential blow up because of the high dimensionality of the conditioned event. For instance, if $|\Omega|=1e5$, then capturing the distribution of a sequence with context length 100 requires modelling $(1e5)^{100}$ possible combinations, which is already higher than the number of atoms in the observable universe. Following LeCun's cake philosophy, these high dimensional distributions fall under the regime of unsupervised learning, since it's intractable to provide an exponential amount of ground truth labels.
+is the n-dimensional joint probability distribution expressed with conditionals via factorization of the chain rule. We can also represent any joint distribution as a probabilistic graphical model which is encoded as a DAG $G=\{V, E\}$ where vertices represent random variables, and edges represent conditional distributions — this is called a *bayesian network*. Since the graph is encoding a high dimensional joint distribution, each vertex is a graph itself (called a probability table) in order to capture all conditional dependencies. Unfortunately, the parameter sizes of these joint probability distributions (and their graphical representations) grow exponentially with respect to $n$. This is known as the "curse of dimensionality".
 
-We can represent a joint distribution as a probabilistic graphical model which is encoded as a DAG $G=\{V, E\}$ where vertices represent random variables, and edges represent conditional distributions — this is called a bayesian network. Since the graph is encoding a high dimensional joint distribution, each vertex is a graph itself (called a probability table) in order to capture all conditional dependencies. These probability tables grow exponentially because of the curse of dimensionality:
+For instance, if $|\Omega|=1e5$, then capturing the distribution of a sequence with context length 100 requires parameterizing a model with $(1e5)^{100}$ possible combinations, which is already higher than the number of atoms in the observable universe. Following LeCun's cake philosophy, these high dimensional distributions fall under the regime of unsupervised learning, since it's intractable to
 
+1. provide an exponential amount of ground truth labels let alone
+2. the compute needed to train that many parameters.
 
-The next four sections will cover advances in network architecture to fight against this curse of dimensionality.
+The next four sections will cover advances in network architecture to *fight* against the curse of dimensionality's exponential blow up. The order of advances is presented in a post-hoc logical ordering, even though historically recurrence was the predominant design choice for natural language processing before attention.
 
 1. Sparsification of conditionals
 2. Parameterization conditionals
-3. Parameter sharing + individualization
+3. Causally mask conditionals
 4. Infinite context window
+
+
+
+
+
 
 ### 4 advances in network design contra curse of dimensionality
 *1. Sparsify conditionals with bayesian network*: instead of conditioning on all the previous events (tokens), bayesian networks condition on a select few — namely, a few parents. This effectively adds causal assumptions as an inductive bias since the model does not need to learn those causal relations which can be great if the assumptions hold. However, with respect to large corpora such as wikipedia, common crawl, etc, these assumptions do not hold and end up limiting expressivity.
@@ -179,7 +192,28 @@ $$
 p(X_1=x_1, \ldots, X_n=x_n; \boldsymbol{\theta}) = \prod_{i=1}^{n} p(\mathbf{x}_{i}|\mathbf{x}_{parents(i)})
 $$
 
+
+
 *2. Parameterize conditionals with neural networks*
+learning a distributed representation for words allows each
+training sentence to inform the model about an exponential number of semantically neighboring sentences.
+
+When modeling continuous variables, we obtain generalization more easily (e.g. with smooth classes of functions like multi-layer neural networks or
+Gaussian mixture models) because the function to be learned can be expected to have some local smoothness properties. 
+
+discrete space, most observed objects are almost maximally far from each other in hamming distance
+
+p(w_n|w_i<n) approx p(w_n|w_;i=n-L, i<n)
+with ngrams, What happens when a new combination of n words appears
+that was not seen in the training corpus?
+
+Obviously there is much more information in the sequence that
+immediately precedes the word to predict than just the identity of the previous couple of words
+
+First, it is not taking into account contexts farther than 1 or 2 words,1
+second it is not taking into account the “similarity” between words.
+
+
 approximation of joint distribution
  The probabilistic graphical model can be simulated with a neural network, as shown in
  connections maximized. but no exp blow up because we use parameters in R^d to represent conditionals. no exp blow up with discrete table counting.
@@ -210,9 +244,9 @@ autoencoder + mask = autoregressive model
 any buts?  finite context window?
 
 Masking
-1. convolutional[(Oord et al. 2016)](https://arxiv.org/abs/1609.03499)
+1. convolutional (position) [(Oord et al. 2016)](https://arxiv.org/abs/1609.03499)
     - problem: limited receptive field (hard to capture long-range deps)
-2. attention[(Vaswani et. al 2017)](https://arxiv.org/abs/1706.03762)
+2. attention (context) [(Vaswani et. al 2017)](https://arxiv.org/abs/1706.03762)
     - unlimited receptive field
     - O(1) param scaling wrt data dim
     - 
@@ -231,31 +265,25 @@ expressive, but
 - hard to truly have signal propagate from long history
 - if you think about it, the horizontal connections aren't actually that more expressive. handwavy...
 
+### Attention & Transformer Neural Networks In Depth
+
+Transformer (GPT1)
+Big Transformer (GPT2)
+Very Big Transformer (GPT3)
+Very Big Transformer + SFT + RLHF (ChatGPT)
+
 **ChatGPT (GPT + SFT + RLHF)**
 [(Radford et al. 2018)](https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf), [(Radford et al. 2019)](https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf), [(Radford et al. 2020)](https://arxiv.org/abs/2005.14165)
 
-bert (2018) https://arxiv.org/abs/1810.04805
-t5 (2019) https://arxiv.org/pdf/1910.10683v4
-llama2 (touvron et al. 2023)
+- gemma https://arxiv.org/abs/2403.08295
+- llama
+- deepseek https://github.com/deepseek-ai/DeepSeek-V3/blob/main/DeepSeek_V3.pdf
+- qwen https://arxiv.org/abs/2412.15115
 
-https://x.com/_arohan_/status/1874030290601115873
-https://x.com/alfcnz/status/1774347847401390458
-https://x.com/andrew_n_carr/status/1785697075986141623
-https://kipp.ly/transformer-taxonomy/
-https://lilianweng.github.io/posts/2018-06-24-attention/ 
-https://lilianweng.github.io/posts/2023-01-27-the-transformer-family-v2/
 
-https://x.com/_arohan_/status/1874030290601115873
-https://x.com/giffmana/status/1570152923233144832
-https://www.youtube.com/playlist?list=PLoROMvodv4rNiJRchCzutFw5ItR_Z27CM
-https://e2eml.school/transformers
-https://writings.stephenwolfram.com/2023/02/what-is-chatgpt-doing-and-why-does-it-work/
-https://poloclub.github.io/transformer-explainer/
-https://blog.eleuther.ai/transformer-math/
-http://bactra.org/notebooks/nn-attention-and-transformers.html
-https://vgel.me/posts/handmade-transformer/
-https://x.com/dejavucoder/status/1871939607534936571
-https://x.com/dejavucoder/status/1870379226647392750
+
+
+
 
 ## System 2 Search: ?
 - https://github.com/srush/awesome-o1/
