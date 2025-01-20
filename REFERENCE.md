@@ -5,7 +5,6 @@
     - [Linear Models](#linear-models)
     - [Non-linear Parametric Models](#non-linear-parametric-models)
     - [System 1 Sequence Learning](#system-1-sequence-learning-as-autoregression)
-    - [Transformers in Depth](#transformer-neural-networks-in-depth)
     - [System 2 Thought Search](#system-2-search-)
     - [Non-linear Non-Parametric Models](#non-linear-non-parametric-models)
 2. [Optimization](#optimization)
