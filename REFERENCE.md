@@ -1,11 +1,13 @@
 # Software 2.0 Math Reference
 
+*A famous colleague once sent an actually very well-written paper he was quite proud of to a famous complexity theorist. His answer: “I can’t find a theorem in the paper. I have no idea what this paper is about.*
+
 **Contents**
 1. [Models](#models)
     - [Linear Models](#linear-models)
     - [Non-linear Parametric Models](#non-linear-parametric-models)
-    - [System 1 Sequence Learning](#system-1-sequence-learning-as-autoregression)
-    - [System 2 Thought Search](#system-2-search-)
+    - [System 1 Learning](#system-1-sequence-learning-as-autoregression)
+    - [System 2 Search](#system-2-search)
     - [Non-linear Non-Parametric Models](#non-linear-non-parametric-models)
 2. [Optimization](#optimization)
     - [SGD](#sgd)
@@ -240,7 +242,7 @@ autoencoder + mask = autoregressive model
 - still parameterizing conditionals 
 + parameter sharing across conditionals
 + add coordinate coding to individualize conditionals
-any buts?  finite context window?
+any buts?  finite context window? quadratic scaling?
 
 Masking
 1. convolutional (position) [(Oord et al. 2016)](https://arxiv.org/abs/1609.03499)
@@ -248,8 +250,10 @@ Masking
 2. attention (context) [(Vaswani et. al 2017)](https://arxiv.org/abs/1706.03762)
     - unlimited receptive field
     - O(1) param scaling wrt data dim
-    - 
-
+    - Transformer (GPT1)
+    - Big Transformer (GPT2)
+    - Very Big Transformer (GPT3)
+    - Very Big Transformer + SFT + RLHF (ChatGPT)
 
 
 
@@ -264,29 +268,14 @@ expressive, but
 - hard to truly have signal propagate from long history
 - if you think about it, the horizontal connections aren't actually that more expressive. handwavy...
 
-### Attention & Transformer Neural Networks In Depth
+## System 2 Search:
 
-Transformer (GPT1)
-Big Transformer (GPT2)
-Very Big Transformer (GPT3)
-Very Big Transformer + SFT + RLHF (ChatGPT)
-
-**ChatGPT (GPT + SFT + RLHF)**
-[(Radford et al. 2018)](https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf), [(Radford et al. 2019)](https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf), [(Radford et al. 2020)](https://arxiv.org/abs/2005.14165)
-
-- gemma https://arxiv.org/abs/2403.08295
-- llama
-- deepseek https://github.com/deepseek-ai/DeepSeek-V3/blob/main/DeepSeek_V3.pdf
-- qwen https://arxiv.org/abs/2412.15115
+- see the emergent behavior https://x.com/nrehiew_/status/1881792577122586869
 
 
 
 
 
-
-## System 2 Search: ?
-- https://github.com/srush/awesome-o1/
-- https://github.com/hijkzzz/Awesome-LLM-Strawberry
 
 ## Non-linear Non-Parametric Models
 **Kernel Methods**
