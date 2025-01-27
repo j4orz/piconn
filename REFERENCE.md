@@ -250,10 +250,6 @@ Masking
 2. attention (context) [(Vaswani et. al 2017)](https://arxiv.org/abs/1706.03762)
     - unlimited receptive field
     - O(1) param scaling wrt data dim
-    - Transformer (GPT1)
-    - Big Transformer (GPT2)
-    - Very Big Transformer (GPT3)
-    - Very Big Transformer + SFT + RLHF (ChatGPT)
 
 
 
@@ -291,5 +287,5 @@ The general definition of the derivative...important for understanding different
 **Preconditioining: Shampoo**
 
 # 3. Generalization
-https://x.com/cloneofsimo/status/1876047503830995167
-https://x.com/srush_nlp/status/1838940002123727078
+<!-- https://x.com/cloneofsimo/status/1876047503830995167
+https://x.com/srush_nlp/status/1838940002123727078 -->
