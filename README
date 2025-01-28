@@ -1,5 +1,5 @@
 piconn: software 2.0 models on (pytorch-nv) and (jax-tpu)
 references: scardapane/jurafsky, goodfellow/prince
-models (formalized in REFERENCE.md)
-    - pre-transformers: fnn, rnn, lstm, made, wavenet
-    - transformers: gpt2, llama3, r1
+models (formalized in REFERENCE.md):
+    - pre-transformers: fnn, rnn, lstm, made, cnn
+    - transformers: gpt2 (124M), llama3 (7B), r1
